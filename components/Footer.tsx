@@ -199,8 +199,8 @@ export default function Footer() {
             © 2026 ACM Student Chapter · RIT Bengaluru
           </p>
           <p className="text-xs text-slate-700 font-mono">
-            CodeGolf 2.0 · Built with{" "}
-            <span className="text-blue-500/60">{"</>"}</span>
+            Made by{" "}
+            <span className="text-slate-500">Samrudh P & Sagar S R</span>
           </p>
         </div>
       </div>

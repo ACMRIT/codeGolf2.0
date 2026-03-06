@@ -62,7 +62,7 @@ const faqs = [
     id: "f4",
     question: "Is the event individual or team based?",
     answer:
-      "Both! Round 1 is individual. Top performers advance to the Surprise Round — the format is revealed on the day of the event. Expect the unexpected!",
+      "It's pair programming! Both rounds are competed as a 2-member team. Round 1 is DSA Code Golf and the Surprise Round format is revealed on the day of the event. Expect the unexpected!",
   },
   {
     id: "f5",
@@ -206,9 +206,6 @@ export default function Registration() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">
-            // section 05
-          </span>
           <h2 className="mt-2 text-4xl font-bold text-white">Register & Connect</h2>
           <p className="mt-3 text-slate-400 max-w-xl mx-auto">
             Secure your spot at CodeGolf 2.0. Limited seats available.

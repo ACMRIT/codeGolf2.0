@@ -72,9 +72,6 @@ export default function About() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">
-            // section 01
-          </span>
           <h2 className="mt-2 text-4xl font-bold text-white">
             About the Event
           </h2>
@@ -108,8 +105,8 @@ export default function About() {
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-4 pt-2">
                 {[
-                  { icon: Zap, label: "2 Rounds", sub: "Individual + Team" },
-                  { icon: Trophy, label: "₹6000", sub: "Prize Pool" },
+                  { icon: Zap, label: "2 Rounds", sub: "Pair Programming" },
+                  { icon: Trophy, label: "₹10000", sub: "Prize Pool" },
                   { icon: Target, label: "6 Problems", sub: "Across rounds" },
                 ].map(({ icon: Icon, label, sub }) => (
                   <div key={label} className="text-center p-3 rounded-lg bg-white/5 border border-white/5">
@@ -125,7 +122,7 @@ export default function About() {
             <div className="space-y-3">
               {[
                 "Algorithmic problem solving with a conciseness twist",
-                "Compete individually and as a team in two rounds",
+                "Compete as a pair in two rounds of code golf challenges",
                 "Judged by shortest valid code — not just correctness",
                 "Open to all students regardless of experience level",
               ].map((point, i) => (

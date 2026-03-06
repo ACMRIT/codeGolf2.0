@@ -25,7 +25,7 @@ const schedule = [
   },
   {
     time: "10:00 AM",
-    title: "Round 1 — Individual Code Golf",
+    title: "Round 1 — Pair Programming Golf",
     description: "3 DSA problems (Easy / Medium / Hard). 2-hour window. Shortest valid code wins.",
     icon: Code2,
     accent: "sky",
@@ -63,7 +63,7 @@ const schedule = [
 const prizes = [
   {
     rank: "1st",
-    amount: "₹3,000",
+    amount: "₹5,000",
     label: "First Prize",
     icon: Trophy,
     gradient: "from-yellow-500/20 to-amber-500/10",
@@ -74,7 +74,7 @@ const prizes = [
   },
   {
     rank: "2nd",
-    amount: "₹2,000",
+    amount: "₹3,000",
     label: "Second Prize",
     icon: Award,
     gradient: "from-slate-400/15 to-slate-500/10",
@@ -85,7 +85,7 @@ const prizes = [
   },
   {
     rank: "3rd",
-    amount: "₹1,000",
+    amount: "₹2,000",
     label: "Third Prize",
     icon: Medal,
     gradient: "from-amber-700/20 to-amber-800/10",
@@ -130,9 +130,6 @@ export default function Schedule() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">
-            // section 04
-          </span>
           <h2 className="mt-2 text-4xl font-bold text-white">Schedule & Prizes</h2>
           <p className="mt-3 text-slate-400 max-w-xl mx-auto">
             March 12, 2026 — Full day event
@@ -267,7 +264,7 @@ export default function Schedule() {
               className="mt-4 text-center"
             >
               <span className="text-xs text-slate-600 font-mono">Total Prize Pool: </span>
-              <span className="text-lg font-black text-gradient font-mono">₹6,000</span>
+              <span className="text-lg font-black text-gradient font-mono">₹10,000</span>
             </motion.div>
           </motion.div>
         </div>

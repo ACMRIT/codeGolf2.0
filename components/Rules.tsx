@@ -172,9 +172,6 @@ export default function Rules() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">
-            // section 03
-          </span>
           <h2 className="mt-2 text-4xl font-bold text-white">Rules & Judging</h2>
           <p className="mt-3 text-slate-400 max-w-xl mx-auto">
             Know the rules. Play fair. Code shortest.

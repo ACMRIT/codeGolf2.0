@@ -36,7 +36,14 @@ interface StudentData {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const yearOptions = ["1st Year", "2nd Year", "3rd Year", "4th Year", "PG"];
+const yearOptions = ["1st Year", "2nd Year", "3rd Year"];
+
+const VALID_ACM_IDS = new Set([
+  "4266905", "1076965", "5601374", "6890167", "4695167",
+  "655603",  "2422614", "3927235", "9564698", "2336746",
+  "740830",  "7150123", "4113150", "6885030", "2166279",
+  "4974272", "2101131", "2185690", "4344093", "3077719",
+]);
 
 const emptyStudent = (): StudentData => ({
   name: "",
@@ -311,8 +318,8 @@ export default function RegisterPage() {
   const [submittedName, setSubmittedName] = useState("");
 
   const hasAcm =
-    student1.acmMemberId.trim().length > 0 ||
-    student2.acmMemberId.trim().length > 0;
+    (student1.acmMemberId.trim().length > 0 && VALID_ACM_IDS.has(student1.acmMemberId.trim())) ||
+    (student2.acmMemberId.trim().length > 0 && VALID_ACM_IDS.has(student2.acmMemberId.trim()));
   const fee = hasAcm ? 50 : 100;
 
   function update1(field: keyof StudentData, value: string) {
@@ -345,6 +352,12 @@ export default function RegisterPage() {
 
     if (student1.usn.trim().toUpperCase() === student2.usn.trim().toUpperCase())
       return "Both students cannot have the same USN.";
+
+    // ACM ID validation
+    if (student1.acmMemberId.trim() && !VALID_ACM_IDS.has(student1.acmMemberId.trim()))
+      return "Student 1: ACM Membership ID is not valid. Please check and re-enter.";
+    if (student2.acmMemberId.trim() && !VALID_ACM_IDS.has(student2.acmMemberId.trim()))
+      return "Student 2: ACM Membership ID is not valid. Please check and re-enter.";
 
     return null;
   }
@@ -449,9 +462,6 @@ export default function RegisterPage() {
             transition={{ duration: 0.5 }}
             className="text-center mb-10"
           >
-            <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">
-              // codegolf 2.0
-            </span>
             <h1 className="mt-2 text-4xl font-bold text-white tracking-tight">
               Team Registration
             </h1>
@@ -550,7 +560,20 @@ export default function RegisterPage() {
                           team is registered for CodeGolf 2.0. See you on March 12, 2026!
                         </p>
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                      {/* WhatsApp group CTA */}
+                      <a
+                        href="https://chat.whatsapp.com/LyN96l7IDUh1GqcXaI7hl2?mode=gi_t"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors duration-200"
+                      >
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.14 1.535 5.874L.057 23.93l6.231-1.453A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.791 9.791 0 01-5.021-1.384l-.36-.214-3.698.863.927-3.595-.234-.369A9.772 9.772 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+                        </svg>
+                        Join CodeGolf WhatsApp Group
+                      </a>
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <button
                           onClick={() => setSubmitted(false)}
                           className="font-almendra text-xs uppercase tracking-widest text-blue-400 hover:text-blue-300 border border-blue-500/20 hover:border-blue-400/40 px-5 py-2 rounded-md transition-all duration-200"

@@ -37,7 +37,8 @@ export default function AdminPage() {
       const res = await fetch(`/api/admin?pw=${encodeURIComponent(pw)}`);
       const json = await res.json();
       if (!res.ok) {
-        setError("Wrong password.");
+        const msg = res.status === 401 ? "Wrong password." : `Error ${res.status}: ${json.error ?? "server error"}`;
+        setError(msg);
         setUnlocked(false);
       } else {
         setTeams(json.teams);

@@ -23,6 +23,13 @@ interface TeamPayload {
 
 const USN_REGEX = /^\d[A-Z]{2}\d{2}[A-Z]{2,3}\d{3}$/i;
 
+const VALID_ACM_IDS = new Set([
+  "4266905", "1076965", "5601374", "6890167", "4695167",
+  "655603",  "2422614", "3927235", "9564698", "2336746",
+  "740830",  "7150123", "4113150", "6885030", "2166279",
+  "4974272", "2101131", "2185690", "4344093", "3077719",
+]);
+
 function validateTeam(payload: Partial<TeamPayload>): string | null {
   const { lead, member2 } = payload;
 
@@ -50,6 +57,11 @@ function validateTeam(payload: Partial<TeamPayload>): string | null {
 
   if (lead.usn.trim().toUpperCase() === member2.usn.trim().toUpperCase())
     return "Both students cannot have the same USN.";
+
+  if (lead.acmMemberId?.trim() && !VALID_ACM_IDS.has(lead.acmMemberId.trim()))
+    return "Student 1: ACM Membership ID is not valid.";
+  if (member2.acmMemberId?.trim() && !VALID_ACM_IDS.has(member2.acmMemberId.trim()))
+    return "Student 2: ACM Membership ID is not valid.";
 
   return null;
 }
@@ -107,7 +119,8 @@ export async function POST(req: NextRequest) {
     }
 
     const hasAcm =
-      !!(lead.acmMemberId?.trim()) || !!(member2.acmMemberId?.trim());
+      !!(lead.acmMemberId?.trim() && VALID_ACM_IDS.has(lead.acmMemberId.trim())) ||
+      !!(member2.acmMemberId?.trim() && VALID_ACM_IDS.has(member2.acmMemberId.trim()));
 
     const registration = {
       lead: {

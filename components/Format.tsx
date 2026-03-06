@@ -9,7 +9,7 @@ const rounds = [
   {
     number: "01",
     title: "DSA Code Golf",
-    type: "Individual Round",
+    type: "Pair Programming",
     icon: Code2,
     duration: "2 Hours",
     accentColor: "blue",
@@ -19,7 +19,7 @@ const rounds = [
       { label: "Hard", color: "text-red-400 bg-red-500/10 border-red-500/20" },
     ],
     description:
-      "Solve 3 data structures & algorithms challenges individually. Write the most concise valid code to climb the leaderboard.",
+      "Solve 3 data structures & algorithms challenges as a pair. Write the most concise valid code to climb the leaderboard.",
     details: [
       "3 problems (Easy / Medium / Hard)",
       "Scored by character count",
@@ -30,7 +30,7 @@ const rounds = [
   {
     number: "02",
     title: "Surprise Round",
-    type: "Team Challenge",
+    type: "Pair Programming",
     icon: Users,
     duration: "3 Hours",
     accentColor: "sky",
@@ -68,9 +68,6 @@ export default function Format() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-xs font-mono text-blue-400 uppercase tracking-widest">
-            // section 02
-          </span>
           <h2 className="mt-2 text-4xl font-bold text-white">Event Format</h2>
           <p className="mt-3 text-slate-400 max-w-xl mx-auto">
             Two rounds. Two challenges. One winner.
@@ -190,7 +187,7 @@ export default function Format() {
             {[
               { icon: Layers, label: "Platform", value: "HackerRank" },
               { icon: Star, label: "Scoring", value: "Character Count" },
-              { icon: Users, label: "Format", value: "Individual → Team" },
+              { icon: Users, label: "Format", value: "Pair Programming" },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-center gap-3">
                 <Icon className="w-4 h-4 text-blue-400" />
