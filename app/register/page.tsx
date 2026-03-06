@@ -620,6 +620,11 @@ export default function RegisterPage() {
             </div>
           </motion.div>
 
+          {/* QR panel — mobile only (between notice and form) */}
+          <div className="lg:hidden mb-8">
+            <QRPanel fee={fee} />
+          </div>
+
           {/* Two-column layout: form + QR */}
           <div className="grid lg:grid-cols-3 gap-8 items-start">
 
@@ -787,12 +792,12 @@ export default function RegisterPage() {
               </div>
             </motion.div>
 
-            {/* ── QR col (1/3) ── */}
+            {/* ── QR col (1/3) — desktop only ── */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="lg:col-span-1 lg:sticky lg:top-28"
+              className="hidden lg:block lg:col-span-1 lg:sticky lg:top-28"
             >
               <QRPanel fee={fee} />
             </motion.div>
