@@ -292,14 +292,14 @@ function QRPanel({ fee }: { fee: number }) {
       <div className="text-center">
         <p className="text-2xl font-bold text-white">₹{fee}</p>
         <p className="text-xs text-slate-500 mt-1">
-          Pay first, share screenshot on{" "}
+          Pay first, share screenshot <span className="text-white">with team name</span> on{" "}
           <a
-            href="https://wa.me/919606973155"
+            href="https://wa.me/919019083778"
             target="_blank"
             rel="noopener noreferrer"
             className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium"
           >
-            WhatsApp
+            WhatsApp Ranjita
           </a>
           , then register
         </p>
@@ -311,6 +311,7 @@ function QRPanel({ fee }: { fee: number }) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function RegisterPage() {
+  const [teamName, setTeamName] = useState("");
   const [student1, setStudent1] = useState<StudentData>(emptyStudent());
   const [student2, setStudent2] = useState<StudentData>(emptyStudent());
   const [loading, setLoading] = useState(false);
@@ -330,6 +331,9 @@ export default function RegisterPage() {
   }
 
   function validate(): string | null {
+    if (!teamName.trim() || teamName.trim().length < 2)
+      return "Team name is required (at least 2 characters).";
+
     // Student 1
     if (!student1.name.trim() || student1.name.trim().length < 2)
       return "Student 1: Full name is required.";
@@ -373,6 +377,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const payload = {
+        teamName: teamName.trim(),
         lead: {
           name: student1.name.trim(),
           usn: student1.usn.trim().toUpperCase(),
@@ -405,6 +410,7 @@ export default function RegisterPage() {
       } else {
         setSubmittedName(student1.name.trim());
         setSubmitted(true);
+        setTeamName("");
         setStudent1(emptyStudent());
         setStudent2(emptyStudent());
         toast.success("Registration successful!", {
@@ -500,9 +506,9 @@ export default function RegisterPage() {
                 <div>
                   <p className="text-sm font-semibold text-white">Share Screenshot</p>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Send your payment screenshot to coordinator on{" "}
+                    Send your payment screenshot <span className="text-white font-semibold">with your team name</span> to coordinator on{" "}
                     <a
-                      href="https://wa.me/919606973155"
+                      href="https://wa.me/919019083778"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-emerald-400 font-semibold hover:text-emerald-300 transition-colors"
@@ -511,7 +517,7 @@ export default function RegisterPage() {
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
                         <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.14 1.535 5.874L.057 23.93l6.231-1.453A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.791 9.791 0 01-5.021-1.384l-.36-.214-3.698.863.927-3.595-.234-.369A9.772 9.772 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
                       </svg>
-                      WhatsApp Mayeraa Singh
+                      WhatsApp Ranjita
                     </a>
                   </p>
                 </div>
@@ -597,6 +603,24 @@ export default function RegisterPage() {
                       initial={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
+                      {/* Team Name */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-slate-400 flex items-center gap-1">
+                          Team Name <span className="text-blue-400">*</span>
+                        </label>
+                        <div className="relative">
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                          <input
+                            type="text"
+                            placeholder="Enter your team name"
+                            value={teamName}
+                            onChange={(e) => setTeamName(e.target.value)}
+                            required
+                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all"
+                          />
+                        </div>
+                      </div>
+
                       <StudentSection index={1} data={student1} onChange={update1} />
 
                       {/* Divider */}

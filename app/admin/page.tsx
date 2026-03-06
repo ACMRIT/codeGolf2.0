@@ -15,6 +15,7 @@ interface Member {
 }
 
 interface Team {
+  teamName?: string;
   lead: Member;
   member2: Member;
   registrationFee: number;
@@ -63,12 +64,14 @@ export default function AdminPage() {
     const rows = [
       [
         "Team #",
+        "Team Name",
         "S1 Name", "S1 USN", "S1 Branch", "S1 Year", "S1 Email", "S1 Phone", "S1 ACM",
         "S2 Name", "S2 USN", "S2 Branch", "S2 Year", "S2 ACM",
         "Fee", "Registered At",
       ],
       ...teams.map((t, i) => [
         i + 1,
+        t.teamName ?? "",
         t.lead.name, t.lead.usn, t.lead.branch, t.lead.year, t.lead.email ?? "", t.lead.phone ?? "", t.lead.acmMemberId ?? "",
         t.member2.name, t.member2.usn, t.member2.branch, t.member2.year, t.member2.acmMemberId ?? "",
         `₹${t.registrationFee}`,
@@ -215,8 +218,8 @@ export default function AdminPage() {
                               {idx + 1}
                             </span>
                             <div>
-                              <p className="text-sm font-semibold text-white">{team.lead.name}</p>
-                              <p className="text-xs text-slate-500">{team.lead.email} · {team.lead.phone}</p>
+                              <p className="text-sm font-semibold text-white">{team.teamName || "—"}</p>
+                              <p className="text-xs text-slate-500">{team.lead.name} · {team.lead.email} · {team.lead.phone}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">

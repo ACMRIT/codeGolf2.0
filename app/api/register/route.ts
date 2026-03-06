@@ -15,6 +15,7 @@ interface LeadData extends MemberData {
 }
 
 interface TeamPayload {
+  teamName: string;
   lead: LeadData;
   member2: MemberData;
   member3: null;
@@ -31,7 +32,10 @@ const VALID_ACM_IDS = new Set([
 ]);
 
 function validateTeam(payload: Partial<TeamPayload>): string | null {
-  const { lead, member2 } = payload;
+  const { teamName, lead, member2 } = payload;
+
+  if (!teamName || teamName.trim().length < 2)
+    return "Team name is required.";
 
   if (!lead) return "Lead member details are required.";
   if (!lead.name || lead.name.trim().length < 2)
@@ -75,7 +79,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    const { lead, member2, registrationFee } = body as TeamPayload;
+    const { teamName, lead, member2, registrationFee } = body as TeamPayload;
 
     const client = await getClientPromise();
     const db = client.db("codegolf");
@@ -123,6 +127,7 @@ export async function POST(req: NextRequest) {
       !!(member2.acmMemberId?.trim() && VALID_ACM_IDS.has(member2.acmMemberId.trim()));
 
     const registration = {
+      teamName: teamName.trim(),
       lead: {
         name: lead.name.trim(),
         usn: lead.usn.trim().toUpperCase(),
