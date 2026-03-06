@@ -60,8 +60,8 @@ export default function About() {
   return (
     <section id="about" className="relative py-24 overflow-hidden">
       {/* Background glows */}
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-64 h-64 bg-blue-700/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute right-0 top-1/4 w-48 h-48 bg-sky-700/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-64 h-64 bg-blue-700/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="hidden md:block absolute right-0 top-1/4 w-48 h-48 bg-sky-700/10 rounded-full blur-[80px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}

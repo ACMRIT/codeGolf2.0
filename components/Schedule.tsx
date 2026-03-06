@@ -118,8 +118,8 @@ export default function Schedule() {
 
   return (
     <section id="schedule" className="relative py-24 overflow-hidden">
-      <div className="absolute right-1/4 top-0 w-72 h-72 bg-amber-700/6 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute left-0 bottom-1/3 w-56 h-56 bg-blue-800/8 rounded-full blur-[100px] pointer-events-none" />
+      <div className="hidden md:block absolute right-1/4 top-0 w-72 h-72 bg-amber-700/6 rounded-full blur-[120px] pointer-events-none" />
+      <div className="hidden md:block absolute left-0 bottom-1/3 w-56 h-56 bg-blue-800/8 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}

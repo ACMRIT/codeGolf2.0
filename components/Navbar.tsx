@@ -34,13 +34,18 @@ export default function Navbar() {
   }, []);
 
   const scrollTo = (href: string) => {
+    const wasOpen = mobileOpen;
     setMobileOpen(false);
-    const el = document.getElementById(href.replace("#", ""));
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    // Delay until the drawer close animation (250ms) finishes, so the
+    // page layout has settled before we calculate the scroll target.
+    setTimeout(() => {
+      const el = document.getElementById(href.replace("#", ""));
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, wasOpen ? 280 : 0);
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#0c0f14]/90 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#0c0f14]/95 md:bg-[#0c0f14]/90 md:backdrop-blur-md">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 h-20">
         <div className="flex h-full items-center justify-between">
 

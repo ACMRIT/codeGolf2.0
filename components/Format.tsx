@@ -56,8 +56,8 @@ export default function Format() {
 
   return (
     <section id="format" className="relative py-24 overflow-hidden">
-      <div className="absolute right-0 top-0 w-72 h-72 bg-sky-700/8 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute left-1/4 bottom-0 w-56 h-56 bg-blue-700/8 rounded-full blur-[100px] pointer-events-none" />
+      <div className="hidden md:block absolute right-0 top-0 w-72 h-72 bg-sky-700/8 rounded-full blur-[120px] pointer-events-none" />
+      <div className="hidden md:block absolute left-1/4 bottom-0 w-56 h-56 bg-blue-700/8 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}

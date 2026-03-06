@@ -197,16 +197,8 @@ export default function Hero() {
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-[#060914]">
         <div className="absolute inset-0 bg-mesh" />
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-blue-800/15 blur-[120px]"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-sky-700/15 blur-[100px]"
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.4, 0.2, 0.4] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="hidden md:block absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-blue-800/15 blur-[120px]" />
+        <div className="hidden md:block absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-sky-700/15 blur-[100px]" />
       </div>
 
       {/* Floating symbols */}
@@ -244,7 +236,7 @@ export default function Hero() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600/15 border border-blue-500/25 text-blue-300 text-xs font-mono mb-6"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              ACM Student Chapter · Offline Event · March 12, 2026
+              ACM Student Chapter · ESB Seminar Hall 1 · March 12, 2026
             </motion.div>
 
             {/* Title */}
@@ -281,7 +273,7 @@ export default function Hero() {
               {[
                 { icon: Calendar, text: "March 12, 2026" },
                 { icon: Users, text: "ACM Student Chapter" },
-                { icon: MapPin, text: "Offline Event" },
+                { icon: MapPin, text: "ESB Seminar Hall 1" },
               ].map(({ icon: Icon, text }) => (
                 <div
                   key={text}
@@ -302,13 +294,10 @@ export default function Hero() {
             >
               <Link
                 href="/register"
-                className="group relative flex items-center gap-2.5 px-8 py-3.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-almendra uppercase tracking-widest text-sm transition-all duration-300 shadow-[0_0_25px_rgba(59,130,246,0.45)] hover:shadow-[0_0_45px_rgba(59,130,246,0.7)] overflow-hidden"
+                className="group flex items-center gap-2.5 px-8 py-3.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-almendra uppercase tracking-widest text-sm transition-colors duration-200"
               >
-                <span className="relative z-10 flex items-center gap-2.5">
-                  Register Now
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-white/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                Register Now
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <motion.button
                 onClick={scrollToAbout}
