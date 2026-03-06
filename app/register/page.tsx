@@ -560,7 +560,7 @@ export default function RegisterPage() {
               Team Registration
             </h1>
             <p className="mt-3 text-slate-400 text-sm max-w-md mx-auto">
-              Register your team of 2. Both members are required. If either holds an ACM membership, the fee drops to ₹50.
+              Register your team of 2. Registration fee is <span className="text-white font-semibold">₹100 per team</span>. If <span className="text-white font-semibold">both</span> members hold a valid ACM membership, the fee drops to <span className="text-emerald-400 font-semibold">₹50</span>.
             </p>
           </motion.div>
 
@@ -581,8 +581,8 @@ export default function RegisterPage() {
                 <div>
                   <p className="text-sm font-semibold text-white">Scan &amp; Pay</p>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Pay <span className="text-white font-bold">₹{fee}</span> using the QR code on this page.
-                    {bothAcmVerified && <span className="text-emerald-400"> (ACM discount applied)</span>}
+                    Pay <span className="text-white font-bold">₹100</span> (non-ACM) or <span className="text-emerald-400 font-bold">₹50</span> (both members ACM verified) using the QR code on this page.
+                    {bothAcmVerified && <span className="text-emerald-400 font-semibold"> You qualify for ₹50!</span>}
                   </p>
                 </div>
               </div>
@@ -614,9 +614,16 @@ export default function RegisterPage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">Fill &amp; Submit</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Fill the registration form below and submit once payment is confirmed.</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Verify ACM IDs (if applicable), fill the form below, check the confirmation box, and submit.</p>
                 </div>
               </div>
+            </div>
+            {/* Warning note */}
+            <div className="mt-4 pt-4 border-t border-amber-500/15 flex items-start gap-2">
+              <span className="text-amber-400 text-xs mt-0.5">⚠</span>
+              <p className="text-xs text-amber-400/80 leading-relaxed">
+                <span className="font-semibold text-amber-400">Note:</span> If you pay ₹50 (discounted rate) but your ACM Membership IDs cannot be verified, your registration will be <span className="font-semibold">cancelled</span> and you will need to re-register at the full ₹100 rate.
+              </p>
             </div>
           </motion.div>
 
