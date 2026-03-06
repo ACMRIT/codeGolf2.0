@@ -18,18 +18,10 @@ interface TeamPayload {
   teamName: string;
   lead: LeadData;
   member2: MemberData;
-  member3: null;
   registrationFee: number;
 }
 
 const USN_REGEX = /^\d[A-Z]{2}\d{2}[A-Z]{2,3}\d{3}$/i;
-
-const VALID_ACM_IDS = new Set([
-  "4266905", "1076965", "5601374", "6890167", "4695167",
-  "655603",  "2422614", "3927235", "9564698", "2336746",
-  "740830",  "7150123", "4113150", "6885030", "2166279",
-  "4974272", "2101131", "2185690", "4344093", "3077719",
-]);
 
 function validateTeam(payload: Partial<TeamPayload>): string | null {
   const { teamName, lead, member2 } = payload;
@@ -62,11 +54,6 @@ function validateTeam(payload: Partial<TeamPayload>): string | null {
   if (lead.usn.trim().toUpperCase() === member2.usn.trim().toUpperCase())
     return "Both students cannot have the same USN.";
 
-  if (lead.acmMemberId?.trim() && !VALID_ACM_IDS.has(lead.acmMemberId.trim()))
-    return "Student 1: ACM Membership ID is not valid.";
-  if (member2.acmMemberId?.trim() && !VALID_ACM_IDS.has(member2.acmMemberId.trim()))
-    return "Student 2: ACM Membership ID is not valid.";
-
   return null;
 }
 
@@ -82,8 +69,53 @@ export async function POST(req: NextRequest) {
     const { teamName, lead, member2, registrationFee } = body as TeamPayload;
 
     const client = await getClientPromise();
-    const db = client.db("codegolf");
-    const collection = db.collection("codegolf_registrations");
+    const db = client.db("ACM_RIT");
+    const collection = db.collection("codeGolf2.0");
+    const membersCollection = db.collection("members");
+
+    // Validate ACM IDs against DB if provided
+    if (lead.acmMemberId?.trim()) {
+      const member = await membersCollection.findOne({ member_id: lead.acmMemberId.trim() });
+      if (!member) {
+        return NextResponse.json({ error: "Student 1: ACM Membership ID is not valid." }, { status: 400 });
+      }
+    }
+    if (member2.acmMemberId?.trim()) {
+      const member = await membersCollection.findOne({ member_id: member2.acmMemberId.trim() });
+      if (!member) {
+        return NextResponse.json({ error: "Student 2: ACM Membership ID is not valid." }, { status: 400 });
+      }
+    }
+
+    // Check ACM IDs are not already used in another registration (race condition guard)
+    if (lead.acmMemberId?.trim()) {
+      const acmTaken = await collection.findOne({
+        $or: [
+          { "lead.acmMemberId": lead.acmMemberId.trim() },
+          { "member2.acmMemberId": lead.acmMemberId.trim() },
+        ],
+      });
+      if (acmTaken) {
+        return NextResponse.json(
+          { error: "Student 1: This ACM Membership ID is already used in another registration." },
+          { status: 409 }
+        );
+      }
+    }
+    if (member2.acmMemberId?.trim()) {
+      const acmTaken = await collection.findOne({
+        $or: [
+          { "lead.acmMemberId": member2.acmMemberId.trim() },
+          { "member2.acmMemberId": member2.acmMemberId.trim() },
+        ],
+      });
+      if (acmTaken) {
+        return NextResponse.json(
+          { error: "Student 2: This ACM Membership ID is already used in another registration." },
+          { status: 409 }
+        );
+      }
+    }
 
     const existing = await collection.findOne({
       $or: [
@@ -122,9 +154,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const hasAcm =
-      !!(lead.acmMemberId?.trim() && VALID_ACM_IDS.has(lead.acmMemberId.trim())) ||
-      !!(member2.acmMemberId?.trim() && VALID_ACM_IDS.has(member2.acmMemberId.trim()));
+    // Both must have valid ACM IDs for the ₹50 member discount
+    const hasAcm = !!(lead.acmMemberId?.trim() && member2.acmMemberId?.trim());
 
     const registration = {
       teamName: teamName.trim(),
@@ -144,7 +175,6 @@ export async function POST(req: NextRequest) {
         year: member2.year,
         acmMemberId: member2.acmMemberId?.trim() || null,
       },
-      member3: null,
       memberCount: 2,
       hasAcmMember: hasAcm,
       registrationFee: hasAcm ? 50 : 100,

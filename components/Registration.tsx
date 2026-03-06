@@ -17,27 +17,46 @@ import {
   MapPin,
   ExternalLink,
   CheckCircle,
+  BadgeCheck,
+  XCircle,
+  Loader2,
+  Users,
 } from "lucide-react";
 
-interface FormData {
+const GOOGLE_FORM_URL = "https://forms.gle/kdaAf4vVYzyarM3y5";
+
+type AcmStatus = "idle" | "verifying" | "valid" | "invalid" | "already_registered";
+
+interface MemberForm {
   name: string;
-  studentId: string;
+  usn: string;
   branch: string;
   year: string;
-  email: string;
-  phone: string;
   acmMemberId: string;
+  acmStatus: AcmStatus;
+  acmVerifiedName: string;
 }
 
-const initialForm: FormData = {
+interface LeadForm extends MemberForm {
+  email: string;
+  phone: string;
+}
+
+const emptyMember = (): MemberForm => ({
   name: "",
-  studentId: "",
+  usn: "",
   branch: "",
   year: "",
+  acmMemberId: "",
+  acmStatus: "idle",
+  acmVerifiedName: "",
+});
+
+const emptyLead = (): LeadForm => ({
+  ...emptyMember(),
   email: "",
   phone: "",
-  acmMemberId: "",
-};
+});
 
 const faqs = [
   {
@@ -116,9 +135,8 @@ function FAQItem({
   );
 }
 
-function InputField({
+function TextField({
   label,
-  name,
   type = "text",
   placeholder,
   icon: Icon,
@@ -127,12 +145,11 @@ function InputField({
   required = false,
 }: {
   label: string;
-  name: keyof FormData;
   type?: string;
   placeholder: string;
   icon: React.ElementType;
   value: string;
-  onChange: (name: keyof FormData, value: string) => void;
+  onChange: (value: string) => void;
   required?: boolean;
 }) {
   return (
@@ -145,10 +162,9 @@ function InputField({
         <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
         <input
           type={type}
-          name={name}
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(name, e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-slate-200 placeholder:text-slate-600 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
           autoComplete="off"
         />
@@ -157,31 +173,208 @@ function InputField({
   );
 }
 
+function YearSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-slate-400 flex items-center gap-1">
+        Year of Study <span className="text-blue-400">*</span>
+      </label>
+      <div className="relative">
+        <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10" />
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-slate-200 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors appearance-none"
+          required
+        >
+          <option value="" disabled className="bg-[#0d0d1a]">Select Year</option>
+          {yearOptions.map((y) => (
+            <option key={y} value={y} className="bg-[#0d0d1a]">{y}</option>
+          ))}
+        </select>
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+function AcmVerifyField({
+  value,
+  status,
+  verifiedName,
+  onChange,
+  onVerify,
+}: {
+  value: string;
+  status: AcmStatus;
+  verifiedName: string;
+  onChange: (value: string) => void;
+  onVerify: () => void;
+}) {
+  const statusConfig = {
+    idle: null,
+    verifying: null,
+    valid: { icon: BadgeCheck, color: "text-emerald-400", msg: `Verified: ${verifiedName}` },
+    invalid: { icon: XCircle, color: "text-red-400", msg: "ACM Membership ID is invalid." },
+    already_registered: { icon: XCircle, color: "text-amber-400", msg: "This ACM ID is already used in another registration." },
+  }[status];
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-slate-400 flex items-center gap-1">
+        ACM Membership ID
+        <span className="text-slate-600 text-xs">(optional — both verified = ₹50)</span>
+      </label>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <input
+            type="text"
+            placeholder="e.g. 4266905"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className={`w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border text-slate-200 placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 transition-colors ${
+              status === "valid"
+                ? "border-emerald-500/50 focus:border-emerald-500/50 focus:ring-emerald-500/20"
+                : status === "invalid" || status === "already_registered"
+                ? "border-red-500/40 focus:border-red-500/40 focus:ring-red-500/20"
+                : "border-white/10 focus:border-blue-500/50 focus:ring-blue-500/20"
+            }`}
+            autoComplete="off"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={onVerify}
+          disabled={status === "verifying" || !value.trim()}
+          className="px-3 py-2.5 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-medium hover:bg-blue-600/30 hover:border-blue-400/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap flex items-center gap-1.5"
+        >
+          {status === "verifying" ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <BadgeCheck className="w-3.5 h-3.5" />
+          )}
+          {status === "verifying" ? "Verifying…" : "Verify ID"}
+        </button>
+      </div>
+      {statusConfig && (
+        <p className={`text-xs flex items-center gap-1 ${statusConfig.color}`}>
+          <statusConfig.icon className="w-3.5 h-3.5 flex-shrink-0" />
+          {statusConfig.msg}
+        </p>
+      )}
+    </div>
+  );
+}
+
+
 export default function Registration() {
-  const [form, setForm] = useState<FormData>(initialForm);
+  const [teamName, setTeamName] = useState("");
+  const [lead, setLead] = useState<LeadForm>(emptyLead());
+  const [member2, setMember2] = useState<MemberForm>(emptyMember());
+  const [googleFormChecked, setGoogleFormChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
 
-  const handleChange = (name: keyof FormData, value: string) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const updateLead = (field: keyof LeadForm, value: string) => {
+    setLead((prev) => {
+      const updated = { ...prev, [field]: value };
+      if (field === "acmMemberId") { updated.acmStatus = "idle"; updated.acmVerifiedName = ""; }
+      return updated;
+    });
   };
+
+  const updateMember2 = (field: keyof MemberForm, value: string) => {
+    setMember2((prev) => {
+      const updated = { ...prev, [field]: value };
+      if (field === "acmMemberId") { updated.acmStatus = "idle"; updated.acmVerifiedName = ""; }
+      return updated;
+    });
+  };
+
+  const verifyAcm = async (who: "lead" | "member2") => {
+    const id = who === "lead" ? lead.acmMemberId : member2.acmMemberId;
+    if (!id.trim()) return;
+
+    const setStatus = (status: AcmStatus, name = "") => {
+      if (who === "lead") setLead((p) => ({ ...p, acmStatus: status, acmVerifiedName: name }));
+      else setMember2((p) => ({ ...p, acmStatus: status, acmVerifiedName: name }));
+    };
+
+    setStatus("verifying");
+    try {
+      const res = await fetch(`/api/verify-acm?id=${encodeURIComponent(id.trim())}`);
+      const data = await res.json();
+      if (data.valid) {
+        setStatus("valid", data.name);
+        toast.success(`ACM ID verified: ${data.name}`);
+      } else if (data.reason === "already_registered") {
+        setStatus("already_registered", data.name || "");
+        toast.error("This ACM ID is already used in another registration.");
+      } else {
+        setStatus("invalid");
+        toast.error("Invalid ACM Membership ID.");
+      }
+    } catch {
+      setStatus("idle");
+      toast.error("Verification failed. Please try again.");
+    }
+  };
+
+  const bothAcmVerified = lead.acmStatus === "valid" && member2.acmStatus === "valid";
+  const fee = bothAcmVerified ? 50 : 100;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!googleFormChecked) {
+      toast.error("Please submit the payment Google Form and check the confirmation box.");
+      return;
+    }
+    if (lead.acmMemberId.trim() && lead.acmStatus !== "valid") {
+      toast.error("Student 1: Please verify your ACM Membership ID before submitting.");
+      return;
+    }
+    if (member2.acmMemberId.trim() && member2.acmStatus !== "valid") {
+      toast.error("Student 2: Please verify your ACM Membership ID before submitting.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          teamName,
+          lead: {
+            name: lead.name,
+            usn: lead.usn,
+            branch: lead.branch,
+            year: lead.year,
+            email: lead.email,
+            phone: lead.phone,
+            acmMemberId: lead.acmStatus === "valid" ? lead.acmMemberId : null,
+          },
+          member2: {
+            name: member2.name,
+            usn: member2.usn,
+            branch: member2.branch,
+            year: member2.year,
+            acmMemberId: member2.acmStatus === "valid" ? member2.acmMemberId : null,
+          },
+          registrationFee: fee,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.error || "Something went wrong.");
       } else {
         setSubmitted(true);
-        setForm(initialForm);
+        setTeamName("");
+        setLead(emptyLead());
+        setMember2(emptyMember());
+        setGoogleFormChecked(false);
         toast.success(data.message || "Registered successfully!");
       }
     } catch {
@@ -248,114 +441,123 @@ export default function Registration() {
                       onClick={() => setSubmitted(false)}
                       className="mt-2 font-almendra text-xs uppercase tracking-widest text-blue-400 hover:text-blue-300 border border-blue-500/20 hover:border-blue-400/40 px-4 py-1.5 rounded-md transition-all duration-200"
                     >
-                      Register another participant
+                      Register another team
                     </button>
                   </motion.div>
                 ) : (
                   <motion.form
                     key="form"
                     onSubmit={handleSubmit}
-                    className="space-y-4"
+                    className="space-y-6"
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <InputField
-                        label="Full Name"
-                        name="name"
-                        placeholder="John Doe"
-                        icon={User}
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                      />
-                      <InputField
-                        label="Student ID / USN"
-                        name="studentId"
-                        placeholder="1RI21CS001"
-                        icon={Hash}
-                        value={form.studentId}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <InputField
-                        label="Branch / Department"
-                        name="branch"
-                        placeholder="Computer Science"
-                        icon={BookOpen}
-                        value={form.branch}
-                        onChange={handleChange}
-                        required
-                      />
-                      {/* Year of Study — select */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-slate-400 flex items-center gap-1">
-                          Year of Study <span className="text-blue-400">*</span>
-                        </label>
-                        <div className="relative">
-                          <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10" />
-                          <select
-                            value={form.year}
-                            onChange={(e) => handleChange("year", e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-slate-200 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors appearance-none"
-                            required
-                          >
-                            <option value="" disabled className="bg-[#0d0d1a]">
-                              Select Year
-                            </option>
-                            {yearOptions.map((y) => (
-                              <option key={y} value={y} className="bg-[#0d0d1a]">
-                                {y}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <InputField
-                        label="Email Address"
-                        name="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        icon={Mail}
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                      />
-                      <InputField
-                        label="Phone Number"
-                        name="phone"
-                        type="tel"
-                        placeholder="9876543210"
-                        icon={Phone}
-                        value={form.phone}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <InputField
-                      label="ACM Membership ID (Optional)"
-                      name="acmMemberId"
-                      placeholder="ACM-XXXXXXXX"
-                      icon={CreditCard}
-                      value={form.acmMemberId}
-                      onChange={handleChange}
+                    {/* Team Name */}
+                    <TextField
+                      label="Team Name"
+                      placeholder="e.g. Team Segfault"
+                      icon={Users}
+                      value={teamName}
+                      onChange={setTeamName}
+                      required
                     />
 
-                    <div className="pt-2">
+                    {/* ── Student 1 (Lead) ── */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-px flex-1 bg-white/5" />
+                        <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider px-2">
+                          Student 1 (Lead)
+                        </span>
+                        <div className="h-px flex-1 bg-white/5" />
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <TextField label="Full Name" placeholder="John Doe" icon={User} value={lead.name} onChange={(v) => updateLead("name", v)} required />
+                        <TextField label="USN" placeholder="1MS23CS001" icon={Hash} value={lead.usn} onChange={(v) => updateLead("usn", v)} required />
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <TextField label="Branch / Department" placeholder="Computer Science" icon={BookOpen} value={lead.branch} onChange={(v) => updateLead("branch", v)} required />
+                        <YearSelect value={lead.year} onChange={(v) => updateLead("year", v)} />
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <TextField label="Email Address" type="email" placeholder="you@example.com" icon={Mail} value={lead.email} onChange={(v) => updateLead("email", v)} required />
+                        <TextField label="Phone Number" type="tel" placeholder="9876543210" icon={Phone} value={lead.phone} onChange={(v) => updateLead("phone", v)} required />
+                      </div>
+                      <AcmVerifyField value={lead.acmMemberId} status={lead.acmStatus} verifiedName={lead.acmVerifiedName} onChange={(v) => updateLead("acmMemberId", v)} onVerify={() => verifyAcm("lead")} />
+                    </div>
+
+                    {/* ── Student 2 ── */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-px flex-1 bg-white/5" />
+                        <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider px-2">
+                          Student 2
+                        </span>
+                        <div className="h-px flex-1 bg-white/5" />
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <TextField label="Full Name" placeholder="Jane Doe" icon={User} value={member2.name} onChange={(v) => updateMember2("name", v)} required />
+                        <TextField label="USN" placeholder="1MS23CS002" icon={Hash} value={member2.usn} onChange={(v) => updateMember2("usn", v)} required />
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <TextField label="Branch / Department" placeholder="Computer Science" icon={BookOpen} value={member2.branch} onChange={(v) => updateMember2("branch", v)} required />
+                        <YearSelect value={member2.year} onChange={(v) => updateMember2("year", v)} />
+                      </div>
+                      <AcmVerifyField value={member2.acmMemberId} status={member2.acmStatus} verifiedName={member2.acmVerifiedName} onChange={(v) => updateMember2("acmMemberId", v)} onVerify={() => verifyAcm("member2")} />
+                    </div>
+
+                    {/* Fee Banner */}
+                    <div className={`rounded-lg px-4 py-3 flex items-center justify-between border text-sm transition-all duration-500 ${
+                      bothAcmVerified
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                        : "bg-white/4 border-white/10 text-slate-400"
+                    }`}>
+                      <span>
+                        {bothAcmVerified
+                          ? "ACM member discount applied — both members verified!"
+                          : "Verify both ACM IDs to get the ₹50 member discount."}
+                      </span>
+                      <span className="font-bold text-base ml-4 shrink-0">₹{fee}</span>
+                    </div>
+
+                    {/* Google Form Payment */}
+                    <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 space-y-3">
+                      <p className="text-sm text-slate-300 font-medium">Payment Submission</p>
+                      <p className="text-xs text-slate-400 leading-relaxed">
+                        Pay ₹{fee} via UPI and submit your payment screenshot along with your team name using the Google Form below. Registration is confirmed only after payment verification.
+                      </p>
+                      <a
+                        href={GOOGLE_FORM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 border border-blue-500/25 hover:border-blue-400/40 px-3 py-2 rounded-md transition-all"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Open Payment Submission Form
+                      </a>
+                      <label className="flex items-start gap-2.5 cursor-pointer group mt-1">
+                        <input
+                          type="checkbox"
+                          checked={googleFormChecked}
+                          onChange={(e) => setGoogleFormChecked(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 rounded accent-blue-500 cursor-pointer"
+                        />
+                        <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed">
+                          I have submitted my payment screenshot to the Google Form
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Submit */}
+                    <div className="pt-1">
                       <motion.button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !googleFormChecked}
                         className="group relative w-full flex items-center justify-center gap-2.5 py-3.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-almendra uppercase tracking-widest text-sm transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)] overflow-hidden"
-                        whileHover={!loading ? { scale: 1.02 } : {}}
-                        whileTap={!loading ? { scale: 0.98 } : {}}
+                        whileHover={!loading && googleFormChecked ? { scale: 1.02 } : {}}
+                        whileTap={!loading && googleFormChecked ? { scale: 0.98 } : {}}
                       >
                         <span className="relative z-10 flex items-center gap-2.5">
                           {loading ? (
@@ -370,8 +572,15 @@ export default function Registration() {
                             </>
                           )}
                         </span>
-                        {!loading && <span className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-white/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />}
+                        {!loading && googleFormChecked && (
+                          <span className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-white/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                        )}
                       </motion.button>
+                      {!googleFormChecked && (
+                        <p className="text-xs text-amber-400/80 text-center mt-2">
+                          Submit the payment Google Form and check the box above to enable registration.
+                        </p>
+                      )}
                     </div>
 
                     <p className="text-xs text-slate-600 text-center">
@@ -383,7 +592,6 @@ export default function Registration() {
               </AnimatePresence>
             </div>
           </motion.div>
-
           {/* Right side — FAQ + Contact — col span 2 */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}

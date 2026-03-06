@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import getClientPromise from "@/lib/mongodb";
 
-const ADMIN_PASSWORD = "acm2026";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function GET(req: NextRequest) {
   const pw = req.nextUrl.searchParams.get("pw");
@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
 
   try {
     const client = await getClientPromise();
-    const db = client.db("codegolf");
-    const collection = db.collection("codegolf_registrations");
+    const db = client.db("ACM_RIT");
+    const collection = db.collection("codeGolf2.0");
 
     const teams = await collection
       .find({}, { projection: { _id: 0 } })

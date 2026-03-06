@@ -20,9 +20,15 @@ import {
   Users,
   IndianRupee,
   Tag,
+  BadgeCheck,
+  XCircle,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+
+type AcmStatus = "idle" | "verifying" | "valid" | "invalid" | "already_registered";
 
 interface StudentData {
   name: string;
@@ -32,18 +38,15 @@ interface StudentData {
   email: string;
   phone: string;
   acmMemberId: string;
+  acmStatus: AcmStatus;
+  acmVerifiedName: string;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const yearOptions = ["1st Year", "2nd Year", "3rd Year"];
+const GOOGLE_FORM_URL = "https://forms.gle/kdaAf4vVYzyarM3y5";
 
-const VALID_ACM_IDS = new Set([
-  "4266905", "1076965", "5601374", "6890167", "4695167",
-  "655603",  "2422614", "3927235", "9564698", "2336746",
-  "740830",  "7150123", "4113150", "6885030", "2166279",
-  "4974272", "2101131", "2185690", "4344093", "3077719",
-]);
+const yearOptions = ["1st Year", "2nd Year", "3rd Year", "4th Year", "PG"];
 
 const emptyStudent = (): StudentData => ({
   name: "",
@@ -53,6 +56,8 @@ const emptyStudent = (): StudentData => ({
   email: "",
   phone: "",
   acmMemberId: "",
+  acmStatus: "idle",
+  acmVerifiedName: "",
 });
 
 const USN_REGEX = /^\d[A-Z]{2}\d{2}[A-Z]{2,3}\d{3}$/i;
@@ -137,10 +142,12 @@ function StudentSection({
   index,
   data,
   onChange,
+  onVerify,
 }: {
   index: 1 | 2;
   data: StudentData;
   onChange: (field: keyof StudentData, value: string) => void;
+  onVerify: () => void;
 }) {
   const label = index === 1 ? "Student 1 — Team Lead" : "Student 2";
 
@@ -212,14 +219,60 @@ function StudentSection({
         </div>
       )}
 
-      <InputField
-        label="ACM Membership ID"
-        placeholder="ACM-XXXXXXXX"
-        icon={CreditCard}
-        value={data.acmMemberId}
-        onChange={(v) => onChange("acmMemberId", v)}
-        hint="(optional — affects registration fee)"
-      />
+      {/* ACM verify row */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-slate-400 flex items-center gap-1">
+          ACM Membership ID
+          <span className="text-slate-600 font-normal ml-1">(optional — both verified = ₹50)</span>
+        </label>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="e.g. 4266905"
+              value={data.acmMemberId}
+              onChange={(e) => { onChange("acmMemberId", e.target.value); onChange("acmStatus", "idle"); onChange("acmVerifiedName", ""); }}
+              className={`w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border text-slate-200 placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 transition-colors ${
+                data.acmStatus === "valid"
+                  ? "border-emerald-500/50 focus:border-emerald-500/50 focus:ring-emerald-500/20"
+                  : data.acmStatus === "invalid" || data.acmStatus === "already_registered"
+                  ? "border-red-500/40 focus:border-red-500/40 focus:ring-red-500/20"
+                  : "border-white/10 focus:border-blue-500/50 focus:ring-blue-500/20"
+              }`}
+              autoComplete="off"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={onVerify}
+            disabled={data.acmStatus === "verifying" || !data.acmMemberId.trim()}
+            className="px-3 py-2.5 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-medium hover:bg-blue-600/30 hover:border-blue-400/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap flex items-center gap-1.5"
+          >
+            {data.acmStatus === "verifying" ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <BadgeCheck className="w-3.5 h-3.5" />
+            )}
+            {data.acmStatus === "verifying" ? "Verifying…" : "Verify ID"}
+          </button>
+        </div>
+        {data.acmStatus === "valid" && (
+          <p className="text-xs flex items-center gap-1 text-emerald-400">
+            <BadgeCheck className="w-3.5 h-3.5" /> Verified: {data.acmVerifiedName}
+          </p>
+        )}
+        {data.acmStatus === "invalid" && (
+          <p className="text-xs flex items-center gap-1 text-red-400">
+            <XCircle className="w-3.5 h-3.5" /> ACM Membership ID is invalid.
+          </p>
+        )}
+        {data.acmStatus === "already_registered" && (
+          <p className="text-xs flex items-center gap-1 text-amber-400">
+            <XCircle className="w-3.5 h-3.5" /> This ACM ID is already used in another registration.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -292,14 +345,15 @@ function QRPanel({ fee }: { fee: number }) {
       <div className="text-center">
         <p className="text-2xl font-bold text-white">₹{fee}</p>
         <p className="text-xs text-slate-500 mt-1">
-          Pay first, share screenshot <span className="text-white">with team name</span> on{" "}
+          Pay first, then submit your screenshot{" "}
+          <span className="text-white">with team name</span> via the{" "}
           <a
-            href="https://wa.me/919019083778"
+            href={GOOGLE_FORM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium"
+            className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
           >
-            WhatsApp Ranjita
+            payment form
           </a>
           , then register
         </p>
@@ -314,20 +368,53 @@ export default function RegisterPage() {
   const [teamName, setTeamName] = useState("");
   const [student1, setStudent1] = useState<StudentData>(emptyStudent());
   const [student2, setStudent2] = useState<StudentData>(emptyStudent());
+  const [googleFormChecked, setGoogleFormChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
 
-  const hasAcm =
-    (student1.acmMemberId.trim().length > 0 && VALID_ACM_IDS.has(student1.acmMemberId.trim())) ||
-    (student2.acmMemberId.trim().length > 0 && VALID_ACM_IDS.has(student2.acmMemberId.trim()));
-  const fee = hasAcm ? 50 : 100;
+  // Both must be verified for discount
+  const bothAcmVerified = student1.acmStatus === "valid" && student2.acmStatus === "valid";
+  const fee = bothAcmVerified ? 50 : 100;
 
   function update1(field: keyof StudentData, value: string) {
     setStudent1((p) => ({ ...p, [field]: value }));
   }
   function update2(field: keyof StudentData, value: string) {
     setStudent2((p) => ({ ...p, [field]: value }));
+  }
+
+  async function verifyAcm(who: 1 | 2) {
+    const data = who === 1 ? student1 : student2;
+    const other = who === 1 ? student2 : student1;
+    const update = who === 1 ? update1 : update2;
+    if (!data.acmMemberId.trim()) return;
+
+    if (data.acmMemberId.trim() === other.acmMemberId.trim()) {
+      update("acmStatus", "invalid");
+      toast.error("Both students cannot use the same ACM Membership ID.");
+      return;
+    }
+
+    update("acmStatus", "verifying");
+    try {
+      const res = await fetch(`/api/verify-acm?id=${encodeURIComponent(data.acmMemberId.trim())}`);
+      const json = await res.json();
+      if (json.valid) {
+        update("acmStatus", "valid");
+        update("acmVerifiedName", json.name);
+        toast.success(`ACM ID verified: ${json.name}`);
+      } else if (json.reason === "already_registered") {
+        update("acmStatus", "already_registered");
+        toast.error("This ACM ID is already used in another registration.");
+      } else {
+        update("acmStatus", "invalid");
+        toast.error("Invalid ACM Membership ID.");
+      }
+    } catch {
+      update("acmStatus", "idle");
+      toast.error("Verification failed. Please try again.");
+    }
   }
 
   function validate(): string | null {
@@ -345,6 +432,8 @@ export default function RegisterPage() {
       return "Student 1: A valid email is required.";
     if (!student1.phone || !/^[6-9]\d{9}$/.test(student1.phone.replace(/\s/g, "")))
       return "Student 1: A valid 10-digit Indian phone number is required.";
+    if (student1.acmMemberId.trim() && student1.acmStatus !== "valid")
+      return "Student 1: Please verify your ACM Membership ID before submitting.";
 
     // Student 2
     if (!student2.name.trim() || student2.name.trim().length < 2)
@@ -353,15 +442,14 @@ export default function RegisterPage() {
       return "Student 2: USN must follow format like 1MS23CS001.";
     if (!student2.branch.trim()) return "Student 2: Branch is required.";
     if (!student2.year) return "Student 2: Year of study is required.";
+    if (student2.acmMemberId.trim() && student2.acmStatus !== "valid")
+      return "Student 2: Please verify your ACM Membership ID before submitting.";
 
     if (student1.usn.trim().toUpperCase() === student2.usn.trim().toUpperCase())
       return "Both students cannot have the same USN.";
 
-    // ACM ID validation
-    if (student1.acmMemberId.trim() && !VALID_ACM_IDS.has(student1.acmMemberId.trim()))
-      return "Student 1: ACM Membership ID is not valid. Please check and re-enter.";
-    if (student2.acmMemberId.trim() && !VALID_ACM_IDS.has(student2.acmMemberId.trim()))
-      return "Student 2: ACM Membership ID is not valid. Please check and re-enter.";
+    if (!googleFormChecked)
+      return "Please submit the payment Google Form and check the confirmation box.";
 
     return null;
   }
@@ -385,16 +473,15 @@ export default function RegisterPage() {
           year: student1.year,
           email: student1.email.toLowerCase().trim(),
           phone: student1.phone.trim(),
-          acmMemberId: student1.acmMemberId.trim() || null,
+          acmMemberId: student1.acmStatus === "valid" ? student1.acmMemberId.trim() : null,
         },
         member2: {
           name: student2.name.trim(),
           usn: student2.usn.trim().toUpperCase(),
           branch: student2.branch.trim(),
           year: student2.year,
-          acmMemberId: student2.acmMemberId.trim() || null,
+          acmMemberId: student2.acmStatus === "valid" ? student2.acmMemberId.trim() : null,
         },
-        member3: null,
         registrationFee: fee,
       };
 
@@ -413,6 +500,7 @@ export default function RegisterPage() {
         setTeamName("");
         setStudent1(emptyStudent());
         setStudent2(emptyStudent());
+        setGoogleFormChecked(false);
         toast.success("Registration successful!", {
           description: `2 members registered. See you at CodeGolf 2.0!`,
           duration: 6000,
@@ -494,7 +582,7 @@ export default function RegisterPage() {
                   <p className="text-sm font-semibold text-white">Scan &amp; Pay</p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Pay <span className="text-white font-bold">₹{fee}</span> using the QR code on this page.
-                    {hasAcm && <span className="text-emerald-400"> (ACM discount applied)</span>}
+                    {bothAcmVerified && <span className="text-emerald-400"> (ACM discount applied)</span>}
                   </p>
                 </div>
               </div>
@@ -504,20 +592,17 @@ export default function RegisterPage() {
                   <span className="text-amber-400 text-xs font-bold">2</span>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Share Screenshot</p>
+                  <p className="text-sm font-semibold text-white">Submit Screenshot</p>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Send your payment screenshot <span className="text-white font-semibold">with your team name</span> to coordinator on{" "}
+                    Upload your payment screenshot <span className="text-white font-semibold">with your team name</span> via the{" "}
                     <a
-                      href="https://wa.me/919019083778"
+                      href={GOOGLE_FORM_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-emerald-400 font-semibold hover:text-emerald-300 transition-colors"
+                      className="inline-flex items-center gap-1 text-blue-400 font-semibold hover:text-blue-300 transition-colors"
                     >
-                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.14 1.535 5.874L.057 23.93l6.231-1.453A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.791 9.791 0 01-5.021-1.384l-.36-.214-3.698.863.927-3.595-.234-.369A9.772 9.772 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
-                      </svg>
-                      WhatsApp Ranjita
+                      <ExternalLink className="w-3 h-3" />
+                      Payment Form
                     </a>
                   </p>
                 </div>
@@ -621,7 +706,7 @@ export default function RegisterPage() {
                         </div>
                       </div>
 
-                      <StudentSection index={1} data={student1} onChange={update1} />
+                      <StudentSection index={1} data={student1} onChange={update1} onVerify={() => verifyAcm(1)} />
 
                       {/* Divider */}
                       <div className="flex items-center gap-3">
@@ -632,19 +717,47 @@ export default function RegisterPage() {
                         <div className="flex-1 h-px bg-white/8" />
                       </div>
 
-                      <StudentSection index={2} data={student2} onChange={update2} />
+                      <StudentSection index={2} data={student2} onChange={update2} onVerify={() => verifyAcm(2)} />
 
                       {/* Fee banner */}
-                      <FeeBanner fee={fee} hasDiscount={hasAcm} />
+                      <FeeBanner fee={fee} hasDiscount={bothAcmVerified} />
+
+                      {/* Google Form payment */}
+                      <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 space-y-3">
+                        <p className="text-sm text-slate-300 font-medium">Payment Submission</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Pay ₹{fee} via UPI and submit your payment screenshot along with your team name using the form below.
+                        </p>
+                        <a
+                          href={GOOGLE_FORM_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 border border-blue-500/25 hover:border-blue-400/40 px-3 py-2 rounded-md transition-all"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Open Payment Submission Form
+                        </a>
+                        <label className="flex items-start gap-2.5 cursor-pointer group mt-1">
+                          <input
+                            type="checkbox"
+                            checked={googleFormChecked}
+                            onChange={(e) => setGoogleFormChecked(e.target.checked)}
+                            className="mt-0.5 w-4 h-4 rounded accent-blue-500 cursor-pointer"
+                          />
+                          <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed">
+                            I have submitted my payment screenshot to the Google Form
+                          </span>
+                        </label>
+                      </div>
 
                       {/* Submit */}
                       <div className="pt-1">
                         <motion.button
                           type="submit"
-                          disabled={loading}
+                          disabled={loading || !googleFormChecked}
                           className="group relative w-full flex items-center justify-center gap-2.5 py-3.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-almendra uppercase tracking-widest text-sm transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.35)] hover:shadow-[0_0_40px_rgba(59,130,246,0.6)] overflow-hidden"
-                          whileHover={!loading ? { scale: 1.02 } : {}}
-                          whileTap={!loading ? { scale: 0.98 } : {}}
+                          whileHover={!loading && googleFormChecked ? { scale: 1.02 } : {}}
+                          whileTap={!loading && googleFormChecked ? { scale: 0.98 } : {}}
                         >
                           <span className="relative z-10 flex items-center gap-2.5">
                             {loading ? (
