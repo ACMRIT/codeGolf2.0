@@ -230,7 +230,7 @@ function StudentSection({
             <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               type="text"
-              placeholder="e.g. 4266905"
+              placeholder="Enter ACM Membership ID"
               value={data.acmMemberId}
               onChange={(e) => { onChange("acmMemberId", e.target.value); onChange("acmStatus", "idle"); onChange("acmVerifiedName", ""); }}
               className={`w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border text-slate-200 placeholder:text-slate-600 text-sm focus:outline-none focus:ring-1 transition-colors ${
@@ -368,6 +368,7 @@ export default function RegisterPage() {
   const [teamName, setTeamName] = useState("");
   const [student1, setStudent1] = useState<StudentData>(emptyStudent());
   const [student2, setStudent2] = useState<StudentData>(emptyStudent());
+  const [transactionId, setTransactionId] = useState("");
   const [googleFormChecked, setGoogleFormChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -448,6 +449,9 @@ export default function RegisterPage() {
     if (student1.usn.trim().toUpperCase() === student2.usn.trim().toUpperCase())
       return "Both students cannot have the same USN.";
 
+    if (!transactionId.trim() || transactionId.trim().length < 2)
+      return "UPI Transaction ID is required.";
+
     if (!googleFormChecked)
       return "Please submit the payment Google Form and check the confirmation box.";
 
@@ -466,6 +470,7 @@ export default function RegisterPage() {
     try {
       const payload = {
         teamName: teamName.trim(),
+        transactionId: transactionId.trim(),
         lead: {
           name: student1.name.trim(),
           usn: student1.usn.trim().toUpperCase(),
@@ -500,6 +505,7 @@ export default function RegisterPage() {
         setTeamName("");
         setStudent1(emptyStudent());
         setStudent2(emptyStudent());
+        setTransactionId("");
         setGoogleFormChecked(false);
         toast.success("Registration successful!", {
           description: `2 members registered. See you at CodeGolf 2.0!`,
@@ -733,6 +739,16 @@ export default function RegisterPage() {
 
                       {/* Fee banner */}
                       <FeeBanner fee={fee} hasDiscount={bothAcmVerified} />
+
+                      {/* UPI Transaction ID */}
+                      <InputField
+                        label="UPI Transaction ID"
+                        placeholder="Enter your UPI transaction ID"
+                        icon={CreditCard}
+                        value={transactionId}
+                        onChange={setTransactionId}
+                        required
+                      />
 
                       {/* Google Form payment */}
                       <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 space-y-3">

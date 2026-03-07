@@ -16,6 +16,7 @@ interface LeadData extends MemberData {
 
 interface TeamPayload {
   teamName: string;
+  transactionId: string;
   lead: LeadData;
   member2: MemberData;
   registrationFee: number;
@@ -24,10 +25,12 @@ interface TeamPayload {
 const USN_REGEX = /^\d[A-Z]{2}\d{2}[A-Z]{2,3}\d{3}$/i;
 
 function validateTeam(payload: Partial<TeamPayload>): string | null {
-  const { teamName, lead, member2 } = payload;
+  const { teamName, transactionId, lead, member2 } = payload;
 
   if (!teamName || teamName.trim().length < 2)
     return "Team name is required.";
+  if (!transactionId || transactionId.trim().length < 2)
+    return "UPI Transaction ID is required.";
 
   if (!lead) return "Lead member details are required.";
   if (!lead.name || lead.name.trim().length < 2)
@@ -66,7 +69,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    const { teamName, lead, member2, registrationFee } = body as TeamPayload;
+    const { teamName, transactionId, lead, member2, registrationFee } = body as TeamPayload;
 
     const client = await getClientPromise();
     const db = client.db("ACM_RIT");
@@ -159,6 +162,7 @@ export async function POST(req: NextRequest) {
 
     const registration = {
       teamName: teamName.trim(),
+      transactionId: transactionId.trim(),
       lead: {
         name: lead.name.trim(),
         usn: lead.usn.trim().toUpperCase(),
