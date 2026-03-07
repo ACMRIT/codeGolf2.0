@@ -16,6 +16,7 @@ interface Member {
 
 interface Team {
   teamName?: string;
+  transactionId?: string;
   lead: Member;
   member2: Member;
   registrationFee: number;
@@ -67,7 +68,7 @@ export default function AdminPage() {
         "Team Name",
         "S1 Name", "S1 USN", "S1 Branch", "S1 Year", "S1 Email", "S1 Phone", "S1 ACM",
         "S2 Name", "S2 USN", "S2 Branch", "S2 Year", "S2 ACM",
-        "Fee", "Registered At",
+        "Fee", "Transaction ID", "Registered At",
       ],
       ...teams.map((t, i) => [
         i + 1,
@@ -75,6 +76,7 @@ export default function AdminPage() {
         t.lead.name, t.lead.usn, t.lead.branch, t.lead.year, t.lead.email ?? "", t.lead.phone ?? "", t.lead.acmMemberId ?? "",
         t.member2.name, t.member2.usn, t.member2.branch, t.member2.year, t.member2.acmMemberId ?? "",
         `₹${t.registrationFee}`,
+        t.transactionId ?? "",
         t.registeredAt ? new Date(t.registeredAt).toLocaleString("en-IN") : "",
       ]),
     ];
@@ -223,6 +225,11 @@ export default function AdminPage() {
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
+                            {team.transactionId && (
+                              <span className="text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md">
+                                TXN: {team.transactionId}
+                              </span>
+                            )}
                             <span
                               className={`text-xs px-2.5 py-1 rounded-md font-mono font-semibold border ${
                                 team.registrationFee === 50

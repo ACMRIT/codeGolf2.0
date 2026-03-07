@@ -449,9 +449,6 @@ export default function RegisterPage() {
     if (student1.usn.trim().toUpperCase() === student2.usn.trim().toUpperCase())
       return "Both students cannot have the same USN.";
 
-    if (!transactionId.trim() || transactionId.trim().length < 2)
-      return "UPI Transaction ID is required.";
-
     if (!googleFormChecked)
       return "Please submit the payment Google Form and check the confirmation box.";
 
@@ -747,7 +744,6 @@ export default function RegisterPage() {
                         icon={CreditCard}
                         value={transactionId}
                         onChange={setTransactionId}
-                        required
                       />
 
                       {/* Google Form payment */}

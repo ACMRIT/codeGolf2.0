@@ -29,8 +29,6 @@ function validateTeam(payload: Partial<TeamPayload>): string | null {
 
   if (!teamName || teamName.trim().length < 2)
     return "Team name is required.";
-  if (!transactionId || transactionId.trim().length < 2)
-    return "UPI Transaction ID is required.";
 
   if (!lead) return "Lead member details are required.";
   if (!lead.name || lead.name.trim().length < 2)
