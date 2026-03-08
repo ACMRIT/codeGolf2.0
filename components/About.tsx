@@ -107,7 +107,7 @@ export default function About() {
                 {[
                   { icon: Zap, label: "2 Rounds", sub: "Pair Programming" },
                   { icon: Trophy, label: "₹10000", sub: "Prize Pool" },
-                  { icon: Target, label: "6 Problems", sub: "Across rounds" },
+                  { icon: Target, label: "9 Problems", sub: "Across rounds" },
                 ].map(({ icon: Icon, label, sub }) => (
                   <div key={label} className="text-center p-3 rounded-lg bg-white/5 border border-white/5">
                     <Icon className="w-4 h-4 text-blue-400 mx-auto mb-1.5" />
