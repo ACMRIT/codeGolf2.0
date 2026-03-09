@@ -1,6 +1,12 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
 
-const options: MongoClientOptions = {};
+const options: MongoClientOptions = {
+  maxPoolSize: 5,
+};
+
+const globalWithMongo = global as typeof globalThis & {
+  _mongoClientPromise?: Promise<MongoClient>;
+};
 
 function getClientPromise(): Promise<MongoClient> {
   if (!process.env.MONGODB_URI) {
@@ -9,20 +15,12 @@ function getClientPromise(): Promise<MongoClient> {
 
   const uri = process.env.MONGODB_URI;
 
-  if (process.env.NODE_ENV === "development") {
-    const globalWithMongo = global as typeof globalThis & {
-      _mongoClientPromise?: Promise<MongoClient>;
-    };
-
-    if (!globalWithMongo._mongoClientPromise) {
-      const client = new MongoClient(uri, options);
-      globalWithMongo._mongoClientPromise = client.connect();
-    }
-    return globalWithMongo._mongoClientPromise!;
+  if (!globalWithMongo._mongoClientPromise) {
+    const client = new MongoClient(uri, options);
+    globalWithMongo._mongoClientPromise = client.connect();
   }
 
-  const client = new MongoClient(uri, options);
-  return client.connect();
+  return globalWithMongo._mongoClientPromise!;
 }
 
 export default getClientPromise;
