@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, useAnimationControls } from "framer-motion";
-import { Calendar, MapPin, Users, ArrowRight, ChevronDown } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowRight, ChevronDown, Trophy } from "lucide-react";
 import Link from "next/link";
 
 // Floating symbols data
@@ -283,6 +283,20 @@ export default function Hero() {
                   {text}
                 </div>
               ))}
+            </motion.div>
+
+            {/* Prize Pool */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl bg-gradient-to-r from-yellow-500/10 to-transparent border border-yellow-500/20"
+            >
+              <Trophy className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+              <div>
+                <p className="text-[10px] text-yellow-500/70 uppercase tracking-widest font-mono">Prize Pool</p>
+                <p className="text-lg font-bold text-white leading-tight">₹10,000</p>
+              </div>
             </motion.div>
 
             {/* CTA Buttons */}
