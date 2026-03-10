@@ -334,7 +334,7 @@ function QRPanel({ fee }: { fee: number }) {
       </p>
       <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white p-2">
         <Image
-          src="/qr.png"
+          src="/qr-1.png"
           alt="Payment QR Code"
           width={200}
           height={200}
