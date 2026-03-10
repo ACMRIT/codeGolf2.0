@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import getClientPromise from "@/lib/mongodb";
 
-const REGISTRATION_CAP = 150;
+const REGISTRATION_CAP = 130;
 
 export async function GET() {
   try {
