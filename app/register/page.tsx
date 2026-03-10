@@ -373,7 +373,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
-  const [registrationFull, setRegistrationFull] = useState(false);
+  const [registrationFull, setRegistrationFull] = useState(true);
 
   // Check registration cap on mount
   useEffect(() => {
