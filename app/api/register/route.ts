@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     // Registration cap: reject once 140 teams are registered
     const teamCount = await collection.countDocuments();
-    if (teamCount >= 140) {
+    if (teamCount >= 150) {
       return NextResponse.json(
         { error: "REGISTRATION_CLOSED" },
         { status: 403 }
