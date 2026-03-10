@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import getClientPromise from "@/lib/mongodb";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD = "acm2026";
 
 export async function GET(req: NextRequest) {
   const pw = req.nextUrl.searchParams.get("pw");

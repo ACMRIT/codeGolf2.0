@@ -23,6 +23,59 @@ interface Team {
   registeredAt: string;
 }
 
+// ── Branch normalization ─────────────────────────────────────────────────────
+function normalizeBranch(raw: string): string {
+  const s = raw.trim().toLowerCase();
+  const c = s.replace(/[\s\-&(),]/g, "").replace(/[^a-z0-9]/g, "");
+
+  // AI & Data Science (all variants incl. typo "Artifical")
+  const isAIDS =
+    (c.includes("datascience") && (c.startsWith("ai") || c.includes("intelligence"))) ||
+    c === "aids" || c === "aiandds" ||
+    (c.startsWith("ai") && (c.endsWith("ds") || c.endsWith("datascience")));
+  if (isAIDS) return "AI & DS";
+
+  // CSE AI&ML — must come before plain CSE check
+  const hasAiMl = c.includes("aiml") || (c.includes("ai") && c.includes("ml"));
+  if (hasAiMl && c.includes("cse")) return "CSE AI&ML";
+  if (hasAiMl) return "AI & ML";
+
+  // Information Science
+  if (c === "ise" || c.includes("informationsci")) return "ISE";
+
+  // Electronics and Communication
+  if (c === "ece" || c.includes("electronicsandcomm")) return "ECE";
+
+  // Electronics and Instrumentation
+  if (c === "eie" || c.includes("instrumentation")) return "EIE";
+
+  // IEM
+  if (c === "iem") return "IEM";
+
+  // Mechanical
+  if (c.includes("mechanical")) return "Mechanical";
+
+  // Civil
+  if (c.includes("civil")) return "Civil";
+
+  // CSE Cyber Security
+  if (c.includes("cyber")) return "CSE Cyber";
+
+  // Chemical
+  if (c.includes("chemical")) return "Chemical";
+
+  // Aerospace
+  if (c.includes("aerospace")) return "Aerospace";
+
+  // Medical Electronics
+  if (c.includes("medical")) return "Medical Elec.";
+
+  // CSE — catch-all
+  if (c === "cse" || c === "csecore" || c.includes("computerscience")) return "CSE";
+
+  return raw.trim() || "Other";
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
@@ -89,6 +142,34 @@ export default function AdminPage() {
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  // ── Derived stats ──────────────────────────────────────────────────────────
+  const allMembers = teams.flatMap((t) => [t.lead, t.member2]);
+  const yearOrder = ["1st Year", "2nd Year", "3rd Year"];
+  const yearMap: Record<string, number> = {};
+  allMembers.forEach((m) => {
+    const y = m.year?.trim() || "Unknown";
+    yearMap[y] = (yearMap[y] ?? 0) + 1;
+  });
+  const yearTotal = allMembers.length || 1;
+  const yearStats = yearOrder
+    .filter((y) => yearMap[y])
+    .map((y, i) => ({
+      year: y,
+      n: yearMap[y] ?? 0,
+      pct: Math.round(((yearMap[y] ?? 0) / yearTotal) * 100),
+      color: ["bg-blue-500", "bg-violet-500", "bg-emerald-500"][i],
+    }));
+
+  const branchMap: Record<string, number> = {};
+  allMembers.forEach((m) => {
+    const b = normalizeBranch(m.branch ?? "");
+    branchMap[b] = (branchMap[b] ?? 0) + 1;
+  });
+  const branchMax = Math.max(...Object.values(branchMap), 1);
+  const branchStats = Object.entries(branchMap)
+    .sort((a, b) => b[1] - a[1])
+    .map(([branch, n]) => ({ branch, n, pct: Math.round((n / branchMax) * 100) }));
 
   return (
     <div className="min-h-screen bg-[#060914] text-white flex flex-col">
@@ -171,6 +252,50 @@ export default function AdminPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* ── Breakdown charts ── */}
+                {count > 0 && (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* Year distribution */}
+                    <div className="glass-card rounded-xl p-5 border border-white/8">
+                      <p className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-4">Year Distribution</p>
+                      <div className="space-y-3">
+                        {yearStats.map(({ year, n, pct, color }) => (
+                          <div key={year}>
+                            <div className="flex justify-between text-xs mb-1.5">
+                              <span className="text-slate-300">{year}</span>
+                              <span className="text-slate-500">{n} students ({pct}%)</span>
+                            </div>
+                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full ${color} transition-all duration-700`} style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Branch distribution */}
+                    <div className="glass-card rounded-xl p-5 border border-white/8">
+                      <p className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-4">Branch Distribution</p>
+                      <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+                        {branchStats.map(({ branch, n, pct }) => (
+                          <div key={branch}>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-slate-300">{branch}</span>
+                              <span className="text-slate-500">{n}</span>
+                            </div>
+                            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-blue-500/70 transition-all duration-700"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex items-center justify-between flex-wrap gap-3">
