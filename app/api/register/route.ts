@@ -74,6 +74,15 @@ export async function POST(req: NextRequest) {
     const collection = db.collection("codeGolf2.0");
     const membersCollection = db.collection("members");
 
+    // Registration cap: reject once 140 teams are registered
+    const teamCount = await collection.countDocuments();
+    if (teamCount >= 140) {
+      return NextResponse.json(
+        { error: "REGISTRATION_CLOSED" },
+        { status: 403 }
+      );
+    }
+
     // Validate ACM IDs against DB if provided
     if (lead.acmMemberId?.trim()) {
       const member = await membersCollection.findOne({ member_id: lead.acmMemberId.trim() });

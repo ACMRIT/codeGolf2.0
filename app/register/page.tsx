@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -373,6 +373,15 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
+  const [registrationFull, setRegistrationFull] = useState(false);
+
+  // Check registration cap on mount
+  useEffect(() => {
+    fetch("/api/status")
+      .then((r) => r.json())
+      .then((d) => { if (d.full) setRegistrationFull(true); })
+      .catch(() => {});
+  }, []);
 
   // Both must be verified for discount
   const bothAcmVerified = student1.acmStatus === "valid" && student2.acmStatus === "valid";
@@ -495,7 +504,11 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Something went wrong.", { duration: 5000 });
+        if (data.error === "REGISTRATION_CLOSED") {
+          setRegistrationFull(true);
+        } else {
+          toast.error(data.error || "Something went wrong.", { duration: 5000 });
+        }
       } else {
         setSubmittedName(student1.name.trim());
         setSubmitted(true);
@@ -552,7 +565,40 @@ export default function RegisterPage() {
       <main className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
 
-          {/* Page heading */}
+          {/* ── Registration Full Screen ── */}
+          {registrationFull && (
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-6"
+            >
+              <div className="w-20 h-20 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mb-2">
+                <CheckCircle className="w-10 h-10 text-emerald-400" />
+              </div>
+              <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+                We&apos;re Full!
+              </h1>
+              <p className="text-xl text-emerald-300 font-semibold">
+                Thank you all for registering!
+              </p>
+              <p className="text-slate-400 max-w-md text-sm leading-relaxed">
+                All <span className="text-white font-semibold">140 team slots</span> have been filled.
+                Registrations are now closed. We look forward to seeing all registered teams at{" "}
+                <span className="text-white font-semibold">CodeGolf 2.0!</span>
+              </p>
+              <Link
+                href="/"
+                className="mt-4 inline-flex items-center gap-2 font-almendra uppercase tracking-widest text-sm px-6 py-3 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-300 hover:bg-blue-600/30 hover:text-white transition-all"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </Link>
+            </motion.div>
+          )}
+
+          {/* ─────────────────── rest of the form (hidden when full) ─────────────────── */}
+          {!registrationFull && (<>
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -821,6 +867,7 @@ export default function RegisterPage() {
               <QRPanel fee={fee} />
             </motion.div>
           </div>
+          </>)}
         </div>
       </main>
     </div>
