@@ -583,7 +583,7 @@ export default function RegisterPage() {
                 Thank you all for registering!
               </p>
               <p className="text-slate-400 max-w-md text-sm leading-relaxed">
-                All <span className="text-white font-semibold">140 team slots</span> have been filled.
+                All <span className="text-white font-semibold">130 team slots</span> have been filled.
                 Registrations are now closed. We look forward to seeing all registered teams at{" "}
                 <span className="text-white font-semibold">CodeGolf 2.0!</span>
               </p>
